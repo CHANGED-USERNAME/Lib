@@ -1150,15 +1150,7 @@ function library:AddWindow(title, options)
 			Window.Visible = isWindowVisible
 		end)
 		
-		spawn(function()
-			while toggleButton and toggleButton.Parent do
-				if not dragging then
-					toggleButton.Position = UDim2.new(0, Window.AbsolutePosition.X - 60, 0, Window.AbsolutePosition.Y)
-				end
-				wait(0.1)
 			end
-		end)
-	end
 
 	do -- UI Elements
 		local tabs = Window:FindFirstChild("Tabs")
