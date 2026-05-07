@@ -52,7 +52,7 @@ function UILibrary:CreateMainUI()
 	Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 8)
 
 	self.Main = Main
-	self.MainPosition = Main.Position -- Store original position
+	self.MainPosition = Main.Position
 
 	local TitleBar = Instance.new("Frame", Main)
 	TitleBar.Size = UDim2.new(1,0,0,35)
@@ -60,17 +60,50 @@ function UILibrary:CreateMainUI()
 	TitleBar.Name = "TitleBar"
 
 	local Title = Instance.new("TextLabel", TitleBar)
-	Title.Size = UDim2.new(1,0,1,0)
+	Title.Size = UDim2.new(1,-40,1,0)
 	Title.BackgroundTransparency = 1
 	Title.Text = self.Title
 	Title.TextColor3 = Color3.fromRGB(255,0,0)
 	Title.Font = Enum.Font.GothamBold
 	Title.TextSize = 16
 
+	-- ADD MINIMIZE BUTTON
+	local MinimizeBtn = Instance.new("TextButton", TitleBar)
+	MinimizeBtn.Size = UDim2.new(0, 35, 1, 0)
+	MinimizeBtn.Position = UDim2.new(1, -35, 0, 0)
+	MinimizeBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	MinimizeBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+	MinimizeBtn.Font = Enum.Font.GothamBold
+	MinimizeBtn.TextSize = 16
+	MinimizeBtn.Text = "−"
+	MinimizeBtn.AutoButtonColor = false
+	Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(0, 5)
+
+	MinimizeBtn.MouseEnter:Connect(function()
+		TweenService:Create(MinimizeBtn, TweenInfo.new(0.2), {
+			BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		}):Play()
+	end)
+
+	MinimizeBtn.MouseLeave:Connect(function()
+		TweenService:Create(MinimizeBtn, TweenInfo.new(0.2), {
+			BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+		}):Play()
+	end)
+
+	MinimizeBtn.MouseButton1Click:Connect(function()
+		self:Minimize()
+	end)
+
 	local dragging, dragStart, startPos
 
 	TitleBar.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			-- Don't drag if clicking the minimize button
+			if input.Position.X > MinimizeBtn.AbsolutePosition.X then
+				return
+			end
+			
 			dragging = true
 			dragStart = input.Position
 			startPos = Main.Position
