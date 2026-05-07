@@ -170,7 +170,8 @@ function UILibrary:CreateMainUI()
 	Instance.new("UICorner", Tabs).CornerRadius = UDim.new(0, 5)
 
 	local TabLayout = Instance.new("UIListLayout", Tabs)
-	TabLayout.Padding = UDim.new(0,5)
+TabLayout.Padding = UDim.new(0,5)
+TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 	TabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		Tabs.CanvasSize = UDim2.new(0,0,0,TabLayout.AbsoluteContentSize.Y + 10)
