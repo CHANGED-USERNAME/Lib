@@ -205,7 +205,11 @@ function UILibrary:CreateCloseOpen()
 
 	Close_ImageButton.Parent = ScreenGui
 	Close_ImageButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	Close_ImageButton.BorderColor3 = Color3.fromRGB(255, 0, 0)
+
+  local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 4)
+UICorner.Parent = Close_ImageButton
+
 	Close_ImageButton.Position = UDim2.new(0.1021, 0, 0.0743, 0)
 	Close_ImageButton.Size = UDim2.new(0, 48, 0, 48)
 	Close_ImageButton.Image = "rbxassetid://79798716472301"
