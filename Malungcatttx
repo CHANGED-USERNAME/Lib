@@ -256,12 +256,12 @@ end
 
 function UILibrary:Minimize()
 	if self.IsMinimized then
-		-- RESTORE UI
+		-- SHOW UI
 		self.IsMinimized = false
-		
+
 		self.Main.Visible = true
-		
-		-- Move UI back smoothly
+
+		-- Start below screen
 		self.Main.Position = UDim2.new(
 			self.MainPosition.X.Scale,
 			self.MainPosition.X.Offset,
@@ -269,18 +269,17 @@ function UILibrary:Minimize()
 			999999
 		)
 
-		local tween = TweenService:Create(
+		TweenService:Create(
 			self.Main,
 			TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
 			{
 				Position = self.MainPosition
 			}
-		)
+		):Play()
 
-		tween:Play()
-
-		tween.Completed:Connect(function()
-			if not self.IsMinimized then
+		-- Hide floating button AFTER restore
+		task.delay(0.45, function()
+			if not self.IsMinimized and self.Close_ImageButton then
 				self.Close_ImageButton.Visible = false
 			end
 		end)
@@ -288,12 +287,12 @@ function UILibrary:Minimize()
 	else
 		-- HIDE UI
 		self.IsMinimized = true
-		
+
 		self.MainPosition = self.Main.Position
-		
+
 		self.Close_ImageButton.Visible = true
 
-		local tween = TweenService:Create(
+		TweenService:Create(
 			self.Main,
 			TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
 			{
@@ -304,12 +303,11 @@ function UILibrary:Minimize()
 					999999
 				)
 			}
-		)
+		):Play()
 
-		tween:Play()
-
-		tween.Completed:Connect(function()
-			if self.IsMinimized then
+		-- Hide main AFTER animation
+		task.delay(0.45, function()
+			if self.IsMinimized and self.Main then
 				self.Main.Visible = false
 			end
 		end)
