@@ -424,49 +424,134 @@ function UILibrary:CreateSlider(parent, title, min, max, default, rounding, call
 end
 
 --// Create toggle
-function UILibrary:CreateToggle(parent, text)
-	local Frame = Instance.new("Frame", parent)
+--// Create toggle
+function UILibrary:CreateToggle(parent, text, callback)
+	local Frame = Instance.new("TextButton")
+	Frame.Parent = parent
 	Frame.Size = UDim2.new(1,-5,0,40)
 	Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-	Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 5)
+	Frame.AutoButtonColor = false
+	Frame.Text = ""
+	Frame.ClipsDescendants = true
 
-	local stroke = Instance.new("UIStroke", Frame)
-	stroke.Color = Color3.fromRGB(255,0,0)
+	local Corner = Instance.new("UICorner", Frame)
+	Corner.CornerRadius = UDim.new(0,6)
 
-	local Label = Instance.new("TextLabel", Frame)
-	Label.Text = text
-	Label.Size = UDim2.new(0.6,0,1,0)
-	Label.Position = UDim2.new(0,10,0,0)
+	local Stroke = Instance.new("UIStroke", Frame)
+	Stroke.Color = Color3.fromRGB(255,0,0)
+	Stroke.Thickness = 1
+
+	--// Label
+	local Label = Instance.new("TextLabel")
+	Label.Parent = Frame
 	Label.BackgroundTransparency = 1
-	Label.TextColor3 = Color3.new(1,1,1)
-	Label.Font = Enum.Font.Gotham
-	Label.TextSize = 14
+	Label.Position = UDim2.new(0,10,0,0)
+	Label.Size = UDim2.new(1,-70,1,0)
+	Label.Font = Enum.Font.GothamSemibold
+	Label.Text = text
+	Label.TextColor3 = Color3.fromRGB(255,255,255)
+	Label.TextSize = 13
 	Label.TextXAlignment = Enum.TextXAlignment.Left
 
-	local Button = Instance.new("TextButton", Frame)
-	Button.Size = UDim2.new(0,45,0,20)
-	Button.Position = UDim2.new(1,-55,0.5,-10)
-	Button.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	Button.Text = ""
-	Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 5)
+	--// Toggle Slider
+	local ToggleSlider = Instance.new("Frame")
+	ToggleSlider.Parent = Frame
+	ToggleSlider.Size = UDim2.fromOffset(36,18)
+	ToggleSlider.AnchorPoint = Vector2.new(1,0.5)
+	ToggleSlider.Position = UDim2.new(1,-12,0.5,0)
+	ToggleSlider.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	ToggleSlider.BackgroundTransparency = 1
 
-	local Dot = Instance.new("Frame", Button)
-	Dot.Size = UDim2.new(0,18,0,18)
-	Dot.Position = UDim2.new(0,1,0.5,-9)
-	Dot.BackgroundColor3 = Color3.fromRGB(255,0,0)
-	Instance.new("UICorner", Dot).CornerRadius = UDim.new(0, 3)
+	local SliderCorner = Instance.new("UICorner", ToggleSlider)
+	SliderCorner.CornerRadius = UDim.new(1,0)
+
+	local SliderStroke = Instance.new("UIStroke", ToggleSlider)
+	SliderStroke.Color = Color3.fromRGB(120,120,120)
+	SliderStroke.Thickness = 1.2
+	SliderStroke.Transparency = 0.3
+
+	--// Circle
+	local ToggleCircle = Instance.new("ImageLabel")
+	ToggleCircle.Parent = ToggleSlider
+	ToggleCircle.BackgroundTransparency = 1
+	ToggleCircle.AnchorPoint = Vector2.new(0,0.5)
+	ToggleCircle.Position = UDim2.new(0,2,0.5,0)
+	ToggleCircle.Size = UDim2.fromOffset(14,14)
+	ToggleCircle.Image = "rbxassetid://12266946128"
+	ToggleCircle.ImageColor3 = Color3.fromRGB(160,160,160)
+	ToggleCircle.ImageTransparency = 0.5
 
 	local enabled = false
-	Button.MouseButton1Click:Connect(function()
-		enabled = not enabled
-		local pos = enabled and UDim2.new(1,-19,0.5,-9) or UDim2.new(0,1,0.5,-9)
-		local col = enabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0)
 
-		TweenService:Create(Dot, TweenInfo.new(0.25), {Position = pos}):Play()
-		TweenService:Create(Dot, TweenInfo.new(0.25), {BackgroundColor3 = col}):Play()
+	--// Update Toggle
+	local function SetToggle(state)
+		enabled = state
+
+		TweenService:Create(
+			ToggleCircle,
+			TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{
+				Position = UDim2.new(0, enabled and 19 or 2, 0.5, 0),
+				ImageColor3 = enabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(160,160,160),
+				ImageTransparency = enabled and 0 or 0.5
+			}
+		):Play()
+
+		TweenService:Create(
+			ToggleSlider,
+			TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{
+				BackgroundTransparency = enabled and 0.45 or 1,
+				BackgroundColor3 = enabled and Color3.fromRGB(255,0,0) or Color3.fromRGB(60,60,60)
+			}
+		):Play()
+
+		TweenService:Create(
+			SliderStroke,
+			TweenInfo.new(0.25),
+			{
+				Color = enabled and Color3.fromRGB(255,0,0) or Color3.fromRGB(120,120,120)
+			}
+		):Play()
+
+		if callback then
+			pcall(callback, enabled)
+		end
+	end
+
+	--// Click Support (PC + Mobile)
+	Frame.MouseButton1Click:Connect(function()
+		SetToggle(not enabled)
 	end)
 
-	return enabled
+	--// Hover Effect (PC only)
+	Frame.MouseEnter:Connect(function()
+		TweenService:Create(Frame, TweenInfo.new(0.15), {
+			BackgroundColor3 = Color3.fromRGB(30,30,30)
+		}):Play()
+	end)
+
+	Frame.MouseLeave:Connect(function()
+		TweenService:Create(Frame, TweenInfo.new(0.15), {
+			BackgroundColor3 = Color3.fromRGB(20,20,20)
+		}):Play()
+	end)
+
+	--// API
+	local ToggleAPI = {}
+
+	function ToggleAPI:SetValue(bool)
+		SetToggle(bool)
+	end
+
+	function ToggleAPI:GetValue()
+		return enabled
+	end
+
+	--// Default State
+	SetToggle(false)
+
+	return ToggleAPI
 end
 
 --// Create dropdown
