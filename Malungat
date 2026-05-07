@@ -1,9 +1,3 @@
---// ============================================
---// 		ADVANCED UI LIBRARY v2.0
---// 		With Icon Support & Reload Prevention
---// ============================================
-
---// Check if UI already exists to prevent duplicate execution
 if _G.UILibraryLoaded then
 	warn("[UILibrary] Already loaded! Reloading UI...")
 	if _G.UILibraryInstance then
@@ -11,20 +5,16 @@ if _G.UILibraryLoaded then
 	end
 end
 
---// Mark as loaded
 _G.UILibraryLoaded = true
 
---// SERVICES
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
---// Create UILibrary class
 local UILibrary = {}
 UILibrary.__index = UILibrary
 
---// Constructor
 function UILibrary.new(title)
 	local self = setmetatable({}, UILibrary)
 	
@@ -39,10 +29,8 @@ function UILibrary.new(title)
 	
 	self:CreateMainUI()
 	
-	--// Store instance globally for reload prevention
 	_G.UILibraryInstance = self
 	
-	--// Handle player leaving to reset on rejoin
 	Players.PlayerRemoving:Connect(function(player)
 		if player == LocalPlayer then
 			_G.UILibraryLoaded = false
@@ -53,9 +41,7 @@ function UILibrary.new(title)
 	return self
 end
 
---// Create main UI structure
 function UILibrary:CreateMainUI()
-	--// MAIN FRAME
 	local Main = Instance.new("Frame", self.ScreenGui)
 	Main.Size = UDim2.new(0, 460, 0, 320)
 	Main.Position = UDim2.new(0.5, -230, 0.5, -160)
@@ -63,13 +49,8 @@ function UILibrary:CreateMainUI()
 	Main.Name = "MainFrame"
 	Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 8)
 
-	local stroke = Instance.new("UIStroke", Main)
-	stroke.Color = Color3.fromRGB(255,0,0)
-	stroke.Thickness = 2
-
 	self.Main = Main
 
-	--// TITLE BAR
 	local TitleBar = Instance.new("Frame", Main)
 	TitleBar.Size = UDim2.new(1,0,0,35)
 	TitleBar.BackgroundTransparency = 1
@@ -83,7 +64,6 @@ function UILibrary:CreateMainUI()
 	Title.Font = Enum.Font.GothamBold
 	Title.TextSize = 16
 
-	--// DRAG FUNCTIONALITY
 	local dragging, dragStart, startPos
 
 	TitleBar.InputBegan:Connect(function(input)
@@ -112,7 +92,6 @@ function UILibrary:CreateMainUI()
 		end
 	end)
 
-	--// TABS FRAME
 	local Tabs = Instance.new("ScrollingFrame", Main)
 	Tabs.Size = UDim2.new(0,120,1,-45)
 	Tabs.Position = UDim2.new(0,5,0,40)
@@ -130,13 +109,11 @@ function UILibrary:CreateMainUI()
 
 	self.Tabs = Tabs
 
-	--// PAGES FOLDER
 	local Pages = Instance.new("Folder", Main)
 	Pages.Name = "Pages"
 	self.Pages = Pages
 end
 
---// Create a page for a tab
 function UILibrary:CreatePage(name)
 	local Page = Instance.new("ScrollingFrame", self.Pages)
 	Page.Name = name
@@ -156,7 +133,6 @@ function UILibrary:CreatePage(name)
 	return Page
 end
 
---// Create a tab with optional icon
 function UILibrary:CreateTab(name, iconId)
 	local Tab = Instance.new("TextButton", self.Tabs)
 	Tab.Size = UDim2.new(1,-10,0,35)
@@ -168,11 +144,6 @@ function UILibrary:CreateTab(name, iconId)
 	Tab.Name = name
 	Instance.new("UICorner", Tab).CornerRadius = UDim.new(0, 5)
 
-	local stroke = Instance.new("UIStroke", Tab)
-	stroke.Color = Color3.fromRGB(50,50,50)
-	stroke.Thickness = 1
-
-	--// Add icon if provided
 	if iconId then
 		local icon = Instance.new("ImageLabel", Tab)
 		icon.Image = iconId
@@ -200,7 +171,6 @@ function UILibrary:CreateTab(name, iconId)
 	self.TabsList[name] = Tab
 	self.PagesList[name] = Page
 
-	--// Tab click handler
 	Tab.MouseButton1Click:Connect(function()
 		for _, p in pairs(self.PagesList) do p.Visible = false end
 		for _, t in pairs(self.TabsList) do
@@ -226,7 +196,6 @@ function UILibrary:CreateTab(name, iconId)
 		end
 	end)
 
-	--// Hover effects
 	Tab.MouseEnter:Connect(function()
 		if Tab.BackgroundColor3 ~= Color3.fromRGB(255,0,0) then
 			TweenService:Create(Tab, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
@@ -242,7 +211,6 @@ function UILibrary:CreateTab(name, iconId)
 	return Page
 end
 
---// Create label
 function UILibrary:CreateLabel(parent, text)
 	local label = Instance.new("TextLabel")
 	label.Name = "Label"
@@ -257,7 +225,6 @@ function UILibrary:CreateLabel(parent, text)
 	label.Position = UDim2.new(0, 15, 0, 0)
 end
 
---// Create textbox
 function UILibrary:CreateTextbox(parent, labelText, onConfirm)
 	local frame = Instance.new("Frame")
 	frame.Parent = parent
@@ -266,9 +233,6 @@ function UILibrary:CreateTextbox(parent, labelText, onConfirm)
 	frame.BackgroundTransparency = 0.2
 	frame.Size = UDim2.new(1, -5, 0, 35)
 	local corner = Instance.new("UICorner"); corner.Parent = frame; corner.CornerRadius = UDim.new(0, 8)
-
-	local stroke = Instance.new("UIStroke", frame)
-	stroke.Color = Color3.fromRGB(255,0,0)
 
 	local label = Instance.new("TextLabel")
 	label.Name = "TextboxLabel"
@@ -300,23 +264,16 @@ function UILibrary:CreateTextbox(parent, labelText, onConfirm)
 	realBox.ClipsDescendants = true
 	local realCorner = Instance.new("UICorner"); realCorner.Parent = realBox; realCorner.CornerRadius = UDim.new(0, 5)
 
-	local realStroke = Instance.new("UIStroke", realBox)
-	realStroke.Color = Color3.fromRGB(255,0,0)
-
 	realBox.FocusLost:Connect(function()
 		pcall(onConfirm, realBox.Text)
 	end)
 end
 
---// Create slider
 function UILibrary:CreateSlider(parent, title, min, max, default, rounding, callback)
 	local frame = Instance.new("Frame", parent)
 	frame.Size = UDim2.new(1, -5, 0, 50)
 	frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 5)
-
-	local stroke = Instance.new("UIStroke", frame)
-	stroke.Color = Color3.fromRGB(255,0,0)
 
 	local label = Instance.new("TextLabel", frame)
 	label.Text = title
@@ -360,9 +317,6 @@ function UILibrary:CreateSlider(parent, title, min, max, default, rounding, call
 
 	local textboxCorner = Instance.new("UICorner", valueTextBox)
 	textboxCorner.CornerRadius = UDim.new(0, 5)
-
-	local textboxStroke = Instance.new("UIStroke", valueTextBox)
-	textboxStroke.Color = Color3.fromRGB(255,0,0)
 
 	local dragging = false
 	local currentValue = default
@@ -423,8 +377,6 @@ function UILibrary:CreateSlider(parent, title, min, max, default, rounding, call
 	UpdateSlider(sliderRail.AbsolutePosition.X + (sliderRail.AbsoluteSize.X * ((default - min) / (max - min))))
 end
 
---// Create toggle
---// Create toggle
 function UILibrary:CreateToggle(parent, text, callback)
 	local Frame = Instance.new("TextButton")
 	Frame.Parent = parent
@@ -437,11 +389,6 @@ function UILibrary:CreateToggle(parent, text, callback)
 	local Corner = Instance.new("UICorner", Frame)
 	Corner.CornerRadius = UDim.new(0,6)
 
-	local Stroke = Instance.new("UIStroke", Frame)
-	Stroke.Color = Color3.fromRGB(255,0,0)
-	Stroke.Thickness = 1
-
-	--// Label
 	local Label = Instance.new("TextLabel")
 	Label.Parent = Frame
 	Label.BackgroundTransparency = 1
@@ -453,7 +400,6 @@ function UILibrary:CreateToggle(parent, text, callback)
 	Label.TextSize = 13
 	Label.TextXAlignment = Enum.TextXAlignment.Left
 
-	--// Toggle Slider
 	local ToggleSlider = Instance.new("Frame")
 	ToggleSlider.Parent = Frame
 	ToggleSlider.Size = UDim2.fromOffset(36,18)
@@ -470,7 +416,6 @@ function UILibrary:CreateToggle(parent, text, callback)
 	SliderStroke.Thickness = 1.2
 	SliderStroke.Transparency = 0.3
 
-	--// Circle
 	local ToggleCircle = Instance.new("ImageLabel")
 	ToggleCircle.Parent = ToggleSlider
 	ToggleCircle.BackgroundTransparency = 1
@@ -483,7 +428,6 @@ function UILibrary:CreateToggle(parent, text, callback)
 
 	local enabled = false
 
-	--// Update Toggle
 	local function SetToggle(state)
 		enabled = state
 
@@ -519,12 +463,10 @@ function UILibrary:CreateToggle(parent, text, callback)
 		end
 	end
 
-	--// Click Support (PC + Mobile)
 	Frame.MouseButton1Click:Connect(function()
 		SetToggle(not enabled)
 	end)
 
-	--// Hover Effect (PC only)
 	Frame.MouseEnter:Connect(function()
 		TweenService:Create(Frame, TweenInfo.new(0.15), {
 			BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -537,7 +479,6 @@ function UILibrary:CreateToggle(parent, text, callback)
 		}):Play()
 	end)
 
-	--// API
 	local ToggleAPI = {}
 
 	function ToggleAPI:SetValue(bool)
@@ -548,13 +489,11 @@ function UILibrary:CreateToggle(parent, text, callback)
 		return enabled
 	end
 
-	--// Default State
 	SetToggle(false)
 
 	return ToggleAPI
 end
 
---// Create dropdown
 function UILibrary:CreateDropdown(parent, title, items, callback)
 	local containerFrame = Instance.new("Frame", parent)
 	containerFrame.Size = UDim2.new(1,-5,0,40)
@@ -566,9 +505,6 @@ function UILibrary:CreateDropdown(parent, title, items, callback)
 	frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 	frame.Position = UDim2.new(0,0,0,0)
 	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 5)
-
-	local stroke = Instance.new("UIStroke", frame)
-	stroke.Color = Color3.fromRGB(255,0,0)
 
 	local label = Instance.new("TextLabel", frame)
 	label.Size = UDim2.new(0.6,0,1,0)
@@ -685,7 +621,6 @@ function UILibrary:CreateDropdown(parent, title, items, callback)
 	end)
 end
 
---// Create button
 function UILibrary:CreateButton(parent, title, callback)
 	local frame = Instance.new("TextButton", parent)
 	frame.Size = UDim2.new(1, -5, 0, 35)
@@ -694,9 +629,6 @@ function UILibrary:CreateButton(parent, title, callback)
 	frame.AutoButtonColor = false
 	frame.Text = ""
 	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 5)
-
-	local stroke = Instance.new("UIStroke", frame)
-	stroke.Color = Color3.fromRGB(255,0,0)
 
 	local label = Instance.new("TextLabel", frame)
 	label.Text = title
@@ -738,7 +670,6 @@ function UILibrary:CreateButton(parent, title, callback)
 	end)
 end
 
---// Destroy UI
 function UILibrary:Destroy()
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
@@ -747,5 +678,4 @@ function UILibrary:Destroy()
 	_G.UILibraryInstance = nil
 end
 
---// Return library
 return UILibrary
