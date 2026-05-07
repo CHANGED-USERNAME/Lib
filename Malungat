@@ -1,3 +1,8 @@
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 if _G.UILibraryLoaded then
 	warn("[UILibrary] Already loaded! Reloading UI...")
 	if _G.UILibraryInstance then
@@ -6,11 +11,6 @@ if _G.UILibraryLoaded then
 end
 
 _G.UILibraryLoaded = true
-
-local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 
 local UILibrary = {}
 UILibrary.__index = UILibrary
@@ -144,6 +144,10 @@ function UILibrary:CreateTab(name, iconId)
 	Tab.Name = name
 	Instance.new("UICorner", Tab).CornerRadius = UDim.new(0, 5)
 
+	local stroke = Instance.new("UIStroke", Tab)
+	stroke.Color = Color3.fromRGB(50,50,50)
+	stroke.Thickness = 1
+
 	if iconId then
 		local icon = Instance.new("ImageLabel", Tab)
 		icon.Image = iconId
@@ -250,8 +254,8 @@ function UILibrary:CreateTextbox(parent, labelText, onConfirm)
 	local realBox = Instance.new("TextBox")
 	realBox.Name = "RealTextbox"
 	realBox.Parent = frame
-	realBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	realBox.BackgroundTransparency = 0.3
+	realBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	realBox.BackgroundTransparency = 0
 	realBox.Position = UDim2.new(1, -5, 0.5, 0)
 	realBox.AnchorPoint = Vector2.new(1, 0.5)
 	realBox.Size = UDim2.new(0, 80, 0, 25)
@@ -263,6 +267,10 @@ function UILibrary:CreateTextbox(parent, labelText, onConfirm)
 	realBox.TextXAlignment = Enum.TextXAlignment.Center
 	realBox.ClipsDescendants = true
 	local realCorner = Instance.new("UICorner"); realCorner.Parent = realBox; realCorner.CornerRadius = UDim.new(0, 5)
+
+	local realStroke = Instance.new("UIStroke", realBox)
+	realStroke.Color = Color3.fromRGB(100, 100, 100)
+	realStroke.Thickness = 1
 
 	realBox.FocusLost:Connect(function()
 		pcall(onConfirm, realBox.Text)
@@ -305,7 +313,7 @@ function UILibrary:CreateSlider(parent, title, min, max, default, rounding, call
 	local valueTextBox = Instance.new("TextBox", frame)
 	valueTextBox.Name = "SliderTextbox"
 	valueTextBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	valueTextBox.BackgroundTransparency = 0.3
+	valueTextBox.BackgroundTransparency = 0
 	valueTextBox.Position = UDim2.new(1, -90, 0, 5)
 	valueTextBox.Size = UDim2.new(0, 80, 0, 20)
 	valueTextBox.Font = Enum.Font.GothamSemibold
@@ -317,6 +325,10 @@ function UILibrary:CreateSlider(parent, title, min, max, default, rounding, call
 
 	local textboxCorner = Instance.new("UICorner", valueTextBox)
 	textboxCorner.CornerRadius = UDim.new(0, 5)
+
+	local textboxStroke = Instance.new("UIStroke", valueTextBox)
+	textboxStroke.Color = Color3.fromRGB(100, 100, 100)
+	textboxStroke.Thickness = 1
 
 	local dragging = false
 	local currentValue = default
