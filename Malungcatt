@@ -29,7 +29,7 @@ function UILibrary.new(title)
 	self.IsMinimized = false
 	
 	self:CreateMainUI()
-	self:CreateShowHideButton()
+	self:CreateCloseOpen()
 	
 	_G.UILibraryInstance = self
 	
@@ -117,58 +117,55 @@ function UILibrary:CreateMainUI()
 	self.Pages = Pages
 end
 
--- NEW: Create Show/Hide Button
-function UILibrary:CreateShowHideButton()
-	local ShowHideGui = Instance.new("ScreenGui")
-	ShowHideGui.Name = "ShowHideButton"
-	ShowHideGui.Parent = game.CoreGui
-	ShowHideGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	
-	self.ShowHideGui = ShowHideGui
-	
-	local ShowHideButton = Instance.new("TextButton")
-	ShowHideButton.Name = "ShowHideButton"
-	ShowHideButton.Parent = ShowHideGui
-	ShowHideButton.Size = UDim2.new(0, 50, 0, 50)
-	ShowHideButton.Position = UDim2.new(0.1, 0, 0.1, 0)
-	ShowHideButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-	ShowHideButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	ShowHideButton.Font = Enum.Font.GothamBold
-	ShowHideButton.TextSize = 12
-	ShowHideButton.Text = "SHOW"
-	ShowHideButton.AutoButtonColor = false
-	ShowHideButton.Visible = false
-	
-	local corner = Instance.new("UICorner", ShowHideButton)
-	corner.CornerRadius = UDim.new(0, 8)
-	
-	local stroke = Instance.new("UIStroke", ShowHideButton)
-	stroke.Color = Color3.fromRGB(150, 0, 0)
-	stroke.Thickness = 2
-	
-	self.ShowHideButton = ShowHideButton
-	
-	-- Dragging functionality
+-- EXACT CloseOpen FUNCTION FROM FIRST FILE
+function UILibrary:CreateCloseOpen()
+	local UIStroke = Instance.new("UIStroke")
+	local UICorner = Instance.new("UICorner")
+
+	local ScreenGui = Instance.new("ScreenGui")
+	local Close_ImageButton = Instance.new("ImageButton")
+
+	do
+		-- ProtectGui equivalent (optional, for executor compatibility)
+		local success, result = pcall(function()
+			return syn and syn.protect_gui
+		end)
+		if success and result then
+			result(ScreenGui)
+		end
+	end
+
+	ScreenGui.Name = "OpenClose"
+	ScreenGui.Parent = game:GetService("CoreGui")
+	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+	Close_ImageButton.Parent = ScreenGui
+	Close_ImageButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Close_ImageButton.BorderColor3 = Color3.fromRGB(255, 0, 0)
+	Close_ImageButton.Position = UDim2.new(0.1021, 0, 0.0743, 0)
+	Close_ImageButton.Size = UDim2.new(0, 48, 0, 48)
+	Close_ImageButton.Image = "rbxassetid://79798716472301"
+	Close_ImageButton.Visible = false
+
+	UICorner.Name = "MainCorner"
+	UICorner.CornerRadius = UDim.new(1, 0)
+	UICorner.Parent = Close_ImageButton
+
 	local dragging = false
 	local dragStart = nil
 	local startPos = nil
-	
-	local function updateDrag(input)
+
+	local function update(input)
 		local delta = input.Position - dragStart
-		ShowHideButton.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
+		Close_ImageButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
-	
-	ShowHideButton.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+
+	Close_ImageButton.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			dragStart = input.Position
-			startPos = ShowHideButton.Position
-			
+			startPos = Close_ImageButton.Position
+
 			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
@@ -176,62 +173,47 @@ function UILibrary:CreateShowHideButton()
 			end)
 		end
 	end)
-	
-	UIS.InputChanged:Connect(function(input)
+
+	Close_ImageButton.InputChanged:Connect(function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			updateDrag(input)
+			update(input)
 		end
 	end)
-	
-	ShowHideButton.MouseEnter:Connect(function()
-		TweenService:Create(ShowHideButton, TweenInfo.new(0.2), {
-			BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-		}):Play()
-	end)
-	
-	ShowHideButton.MouseLeave:Connect(function()
-		TweenService:Create(ShowHideButton, TweenInfo.new(0.2), {
-			BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-		}):Play()
-	end)
-	
-	ShowHideButton.MouseButton1Click:Connect(function()
-		self:ToggleWindow()
+
+	self.Close_ImageButton = Close_ImageButton
+	self.CloseOpenGui = ScreenGui
+
+	-- Button click handler for minimize/restore
+	Close_ImageButton.Activated:Connect(function()
+		if self.Main then
+			self:Minimize()
+		end
 	end)
 end
 
--- NEW: Toggle Window Visibility
-function UILibrary:ToggleWindow()
+-- EXACT Minimize FUNCTION
+function UILibrary:Minimize()
 	if self.IsMinimized then
-		-- Show window
+		-- Restore / show
 		self.IsMinimized = false
 		self.Main.Visible = true
-		self.ShowHideButton.Visible = false
-		self.ShowHideButton.Text = "SHOW"
-		
-		-- Animate window back to original position
-		TweenService:Create(
-			self.Main,
-			TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-			{Position = self.MainPosition}
-		):Play()
+		self.Close_ImageButton.Visible = false
 	else
-		-- Hide window
+		-- Minimize: hide window and show button
 		self.IsMinimized = true
 		self.MainPosition = self.Main.Position -- Save current position
-		self.ShowHideButton.Visible = true
-		self.ShowHideButton.Text = "SHOW"
+		self.Close_ImageButton.Visible = true
 		
-		-- Animate window off-screen
-		local viewportSize = self.ScreenGui.AbsoluteSize
+		-- Animate window down off-screen
+		local offY = 999999 -- Far off screen
 		TweenService:Create(
 			self.Main,
-			TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
-			{Position = UDim2.new(0.5, -230, 1, 50)} -- Move down off-screen
+			TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+			{Position = UDim2.new(0.5, -230, 1, offY)}
 		):Play()
 		
 		-- Hide after animation
-		task.wait(0.4)
+		task.wait(0.5)
 		if self.IsMinimized then
 			self.Main.Visible = false
 		end
@@ -810,8 +792,8 @@ function UILibrary:Destroy()
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
 	end
-	if self.ShowHideGui then
-		self.ShowHideGui:Destroy()
+	if self.CloseOpenGui then
+		self.CloseOpenGui:Destroy()
 	end
 	_G.UILibraryLoaded = false
 	_G.UILibraryInstance = nil
