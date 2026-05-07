@@ -15,6 +15,72 @@ _G.UILibraryLoaded = true
 local UILibrary = {}
 UILibrary.__index = UILibrary
 
+--[[
+	=====================================
+	UILibrary - Complete Documentation
+	=====================================
+	
+	A modern, easy-to-use GUI library for Roblox scripts with:
+	- Draggable windows
+	- Multiple tabs
+	- Various UI elements (toggles, sliders, dropdowns, etc.)
+	- Smooth animations
+	- Minimize/restore functionality
+	
+	INITIALIZATION:
+	===============
+	local lib = UILibrary.new("Window Title")
+	
+	CREATING TABS:
+	===============
+	local tab = lib:CreateTab("Tab Name", "iconId (optional)")
+	
+	ADDING ELEMENTS:
+	================
+	
+	1. BUTTON
+	---------
+	lib:CreateButton(parent, "Button Text", function()
+		print("Button clicked!")
+	end)
+	
+	2. TOGGLE
+	---------
+	local toggle = lib:CreateToggle(parent, "Toggle Text", function(enabled)
+		print("Toggle state:", enabled)
+	end)
+	toggle:SetValue(true) -- Set value
+	print(toggle:GetValue()) -- Get value
+	
+	3. SLIDER
+	---------
+	lib:CreateSlider(parent, "Slider Name", 0, 100, 50, 1, function(value)
+		print("Slider value:", value)
+	end)
+	-- Parameters: parent, title, min, max, default, rounding, callback
+	
+	4. TEXTBOX
+	----------
+	lib:CreateTextbox(parent, "Label Text", function(text)
+		print("Textbox value:", text)
+	end)
+	
+	5. DROPDOWN
+	-----------
+	lib:CreateDropdown(parent, "Select Option", {"Option 1", "Option 2", "Option 3"}, function(selected)
+		print("Selected:", selected)
+	end)
+	
+	6. LABEL
+	--------
+	lib:CreateLabel(parent, "Label Text")
+	
+	DESTROY UI:
+	===========
+	lib:Destroy()
+	
+]]
+
 function UILibrary.new(title)
 	local self = setmetatable({}, UILibrary)
 	
@@ -60,50 +126,17 @@ function UILibrary:CreateMainUI()
 	TitleBar.Name = "TitleBar"
 
 	local Title = Instance.new("TextLabel", TitleBar)
-	Title.Size = UDim2.new(1,-40,1,0)
+	Title.Size = UDim2.new(1,0,1,0)
 	Title.BackgroundTransparency = 1
 	Title.Text = self.Title
 	Title.TextColor3 = Color3.fromRGB(255,0,0)
 	Title.Font = Enum.Font.GothamBold
 	Title.TextSize = 16
 
-	-- ADD MINIMIZE BUTTON
-	local MinimizeBtn = Instance.new("TextButton", TitleBar)
-	MinimizeBtn.Size = UDim2.new(0, 35, 1, 0)
-	MinimizeBtn.Position = UDim2.new(1, -35, 0, 0)
-	MinimizeBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-	MinimizeBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
-	MinimizeBtn.Font = Enum.Font.GothamBold
-	MinimizeBtn.TextSize = 16
-	MinimizeBtn.Text = "−"
-	MinimizeBtn.AutoButtonColor = false
-	Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(0, 5)
-
-	MinimizeBtn.MouseEnter:Connect(function()
-		TweenService:Create(MinimizeBtn, TweenInfo.new(0.2), {
-			BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		}):Play()
-	end)
-
-	MinimizeBtn.MouseLeave:Connect(function()
-		TweenService:Create(MinimizeBtn, TweenInfo.new(0.2), {
-			BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-		}):Play()
-	end)
-
-	MinimizeBtn.MouseButton1Click:Connect(function()
-		self:Minimize()
-	end)
-
 	local dragging, dragStart, startPos
 
 	TitleBar.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			-- Don't drag if clicking the minimize button
-			if input.Position.X > MinimizeBtn.AbsolutePosition.X then
-				return
-			end
-			
 			dragging = true
 			dragStart = input.Position
 			startPos = Main.Position
@@ -150,7 +183,6 @@ function UILibrary:CreateMainUI()
 	self.Pages = Pages
 end
 
--- EXACT CloseOpen FUNCTION FROM FIRST FILE
 function UILibrary:CreateCloseOpen()
 	local UIStroke = Instance.new("UIStroke")
 	local UICorner = Instance.new("UICorner")
@@ -159,7 +191,6 @@ function UILibrary:CreateCloseOpen()
 	local Close_ImageButton = Instance.new("ImageButton")
 
 	do
-		-- ProtectGui equivalent (optional, for executor compatibility)
 		local success, result = pcall(function()
 			return syn and syn.protect_gui
 		end)
@@ -178,7 +209,7 @@ function UILibrary:CreateCloseOpen()
 	Close_ImageButton.Position = UDim2.new(0.1021, 0, 0.0743, 0)
 	Close_ImageButton.Size = UDim2.new(0, 48, 0, 48)
 	Close_ImageButton.Image = "rbxassetid://79798716472301"
-	Close_ImageButton.Visible = false
+	Close_ImageButton.Visible = true
 
 	UICorner.Name = "MainCorner"
 	UICorner.CornerRadius = UDim.new(1, 0)
@@ -216,7 +247,6 @@ function UILibrary:CreateCloseOpen()
 	self.Close_ImageButton = Close_ImageButton
 	self.CloseOpenGui = ScreenGui
 
-	-- Button click handler for minimize/restore
 	Close_ImageButton.Activated:Connect(function()
 		if self.Main then
 			self:Minimize()
@@ -224,28 +254,23 @@ function UILibrary:CreateCloseOpen()
 	end)
 end
 
--- EXACT Minimize FUNCTION
 function UILibrary:Minimize()
 	if self.IsMinimized then
-		-- Restore / show
 		self.IsMinimized = false
 		self.Main.Visible = true
 		self.Close_ImageButton.Visible = false
 	else
-		-- Minimize: hide window and show button
 		self.IsMinimized = true
-		self.MainPosition = self.Main.Position -- Save current position
+		self.MainPosition = self.Main.Position
 		self.Close_ImageButton.Visible = true
 		
-		-- Animate window down off-screen
-		local offY = 999999 -- Far off screen
+		local offY = 999999
 		TweenService:Create(
 			self.Main,
 			TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
 			{Position = UDim2.new(0.5, -230, 1, offY)}
 		):Play()
 		
-		-- Hide after animation
 		task.wait(0.5)
 		if self.IsMinimized then
 			self.Main.Visible = false
